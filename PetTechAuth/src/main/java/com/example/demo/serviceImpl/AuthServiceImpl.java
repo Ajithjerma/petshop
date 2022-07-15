@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
 				Role empRole = roleRepo.findByName(ERole.ROLE_ADMIN);
 				roles.add(empRole);
 			}
-			userDetails user=  userDetails.builder().name(userDto.getName()).email(userDto.getEmail()).password(userDto.getPassword()).confirmPassword(userDto.getConfirmPassword()).gender(userDto.getGender()).number(userDto.getNumber()).userName(userDto.getUserName()).roles(roles).build();
+			userDetails user=  userDetails.builder().name(userDto.getName()).email(userDto.getEmail()).password( encoder.encode(userDto.getPassword())).confirmPassword(userDto.getConfirmPassword()).gender(userDto.getGender()).number(userDto.getNumber()).userName(userDto.getUserName()).roles(roles).build();
 			
 			userRepo.save(user);
 			return ResponseEntity.ok(MessageResponse.builder().status("user added sucessfully")
@@ -65,13 +65,13 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public MessageResponse validateLoginParam(UserDto userDTO) {
+	public ResponseEntity<Object> validateLoginParam(UserDto userDTO) {
 	try {
-		Optional<userDetails> admin = userRepo.findByEmail(userDTO.getEmail());
+		userDetails users = userRepo.findByEmail(userDTO.getEmail());
 		if (!(userDTO.getPassword() != null
-				&& userDTO.getPassword().equalsIgnoreCase(admin.get().getConfirmPassword()))) {
-			return new MessageResponse("invalid password", 206);
-		}
+				&& userDTO.getPassword().equalsIgnoreCase(users.getConfirmPassword()))) {
+			return ResponseEntity.ok(MessageResponse.builder().status("wrong password")
+					.response(HttpStatus.BAD_GATEWAY.value()).build());		}
 		
 		String encryptedPassword = encoder.encode(userDTO.getPassword());
 		Authentication authentication = authenticationManager.authenticate(
@@ -82,11 +82,14 @@ public class AuthServiceImpl implements AuthService {
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 		System.out.println("bearer token:" + jwt);
-		
+		users.setUserStatus("ACTIVE");
+		userRepo.save(users);
+		return ResponseEntity.ok(MessageResponse.builder().status(jwt)
+				.response(HttpStatus.OK.value()).data(users).build());
 	}catch (Exception e) {
-		// TODO: handle exception
-	}
-	return null;
+		System.out.println(e.getLocalizedMessage());
+		return ResponseEntity.ok(MessageResponse.builder().response(HttpStatus.BAD_REQUEST.value())
+				.status("problem adding user").build());		}	
 	}
 
 }

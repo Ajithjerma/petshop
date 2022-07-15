@@ -11,6 +11,6 @@ public interface AuthService  {
 
 	ResponseEntity<Object> createUsers(UserDto userDto);
 
-	MessageResponse validateLoginParam(UserDto userDTO);
+	ResponseEntity<Object> validateLoginParam(UserDto userDTO);
 
 }

@@ -13,12 +13,16 @@ import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class userDetails {
 	@Id@ GeneratedValue(generator="system-uuid")
 	@GenericGenerator(name="system-uuid", strategy = "uuid")
@@ -35,6 +39,7 @@ inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private String gender;
 	private String password;
 	private String confirmPassword;
+	private String userStatus;
 
 
 }

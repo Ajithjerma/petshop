@@ -31,8 +31,7 @@ public class AuthController {
 	@PostMapping(value = "/login", produces = { "application/json" })
 	public ResponseEntity<Object> userLogin(@RequestBody UserDto userDTO, HttpServletRequest request,
 			HttpServletResponse response) {
-		MessageResponse messageResponse = service.validateLoginParam(userDTO);
-		return new ResponseEntity<Object>(messageResponse, HttpStatus.valueOf(messageResponse.getStatus()));
+		return service.validateLoginParam(userDTO);
 
 	}
 }
